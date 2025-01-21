@@ -12,29 +12,34 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const pool = new Pool({
-    user: 'your_username',
-    host: 'localhost',
-    database: 'your_database',
-    password: 'your_password',
-    port: 5432,
+    user: 'postgres',      // pgAdmin foydalanuvchi nomi (odatda postgres)
+    host: 'localhost',              // Server manzili
+    database: 'sql_injection_demo', // Yangi yaratilgan ma’lumotlar bazasi
+    password: '123456', // pgAdmin paroli
+    port: 5432,                     // PostgreSQL standarti porti
 });
+
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
+    // Zaif SQL so'rovi
     const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
-
-    console.log('SQL Query:', query);
+    console.log('SQL Query:', query); // SQL so'rovini ko'rish
 
     try {
         const result = await pool.query(query);
+
+        // Foydalanuvchilar ro‘yxatini chop etish
+        console.log('User List:', result.rows);
+
         if (result.rows.length > 0) {
-            res.json({ success: true, user: result.rows[0] });
+            res.json({ success: true, user: result.rows });
         } else {
             res.json({ success: false, message: 'Invalid credentials' });
         }
     } catch (err) {
-        console.error(err);
+        console.error('Error executing query:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
