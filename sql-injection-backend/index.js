@@ -23,23 +23,22 @@ const pool = new Pool({
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    // Zaif SQL so'rovi
-    const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
-    console.log('SQL Query:', query); // SQL so'rovini ko'rish
+
+    // Himoyalangan SQL so‘rovi
+    const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
+    const values = [username, password];
 
     try {
-        const result = await pool.query(query);
-
-        // Foydalanuvchilar ro‘yxatini chop etish
-        console.log('User List:', result.rows);
+        const result = await pool.query(query, values);
+        console.log('SQL Query:', query);
 
         if (result.rows.length > 0) {
-            res.json({ success: true, user: result.rows });
+            res.json({ success: true, user: result.rows[0] });
         } else {
             res.json({ success: false, message: 'Invalid credentials' });
         }
     } catch (err) {
-        console.error('Error executing query:', err);
+        console.error(err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
